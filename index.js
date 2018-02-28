@@ -13,6 +13,16 @@ function LGR() {
 	this.errStream = FS.createWriteStream('default.error.log');
 }
 
+LGR.prototype.toStr = function(args) {
+	var objects = Object.values(args);
+
+	objects.forEach(function(obj, index){
+		if(typeof obj == 'object') objects[index] = JSON.stringify(obj);
+	});
+
+	return objects;
+};
+
 LGR.prototype.setOut = function(fileName) {
 	if(typeof fileName == 'string') this.outStream = FS.createWriteStream(fileName);
 }
@@ -23,32 +33,32 @@ LGR.prototype.setErr = function(fileName) {
 
 LGR.prototype.critical = function() {
 	this.count++;
-	this.errStream.write('CRITICAL! ' + this._p() + Object.values(arguments).join(" ") + "\n");
+	this.errStream.write('CRITICAL! ' + this._p() + Object.values(this.toStr(arguments)).join(" ") + "\n");
 }
 
 LGR.prototype.error = function() {
 	this.count++;
-	this.errStream.write('ERR! ' + this._p() + Object.values(arguments).join(" ") + "\n");
+	this.errStream.write('ERR! ' + this._p() + Object.values(this.toStr(arguments)).join(" ") + "\n");
 }
 
 LGR.prototype.log = function() {
 	this.count++;
-	this.outStream.write('info ' + this._p() + Object.values(arguments).join(" ") + "\n");
+	this.outStream.write('info ' + this._p() + Object.values(this.toStr(arguments)).join(" ") + "\n");
 }
 
 LGR.prototype.info = function() {
 	this.count++;
-	this.outStream.write('log ' + this._p() + Object.values(arguments).join(" ") + "\n");
+	this.outStream.write('log ' + this._p() + Object.values(this.toStr(arguments)).join(" ") + "\n");
 }
 
 LGR.prototype.verbose = function() {
 	this.count++;
-	this.outStream.write('verb ' + this._p() + Object.values(arguments).join(" ") + "\n");
+	this.outStream.write('verb ' + this._p() + Object.values(this.toStr(arguments)).join(" ") + "\n");
 }
 
 LGR.prototype.debug = function() {
 	this.count++;
-	this.outStream.write('debug ' + this._p() + Object.values(arguments).join(" ") + "\n");
+	this.outStream.write('debug ' + this._p() + Object.values(this.toStr(arguments)).join(" ") + "\n");
 }
 
 LGR.prototype.setLogFormat = function(format) {
