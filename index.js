@@ -1,16 +1,34 @@
 var 
 	FS				= require('fs'),
 	_ 				= require('lodash'),
-	MOMENT 			= require('moment');
+	MOMENT 			= require('moment'),
 
+
+	DEBUG 			= 0,
+	VERBOSE 		= 1,
+	INFO 			= 2,
+	ERROR 			= 3,
+	CRITICAL 		= 4;
 
 function LGR() {
 
 	this.count = 0;
     this.setLogFormat('<%= ts %> [<%= uptime %>] [<%= count %>] ');
 
-	this.outStream = FS.createWriteStream('default.access.log');
-	this.errStream = FS.createWriteStream('default.error.log');
+    this.levelsMap = [
+    	'debug', 
+    	'verbose', 
+    	'info', 
+    	'error', 
+    	'critical'
+    ];
+
+	try{
+		this.outStream = FS.createWriteStream('default.access.log');
+		this.errStream = FS.createWriteStream('default.error.log');
+	}catch(err){
+		console.log('You don\'t have permission to access current directory from user');
+	}
 }
 
 LGR.prototype.toStr = function(args) {
@@ -24,21 +42,40 @@ LGR.prototype.toStr = function(args) {
 };
 
 LGR.prototype.setOut = function(fileName) {
-	if(typeof fileName == 'string') this.outStream = FS.createWriteStream(fileName);
+	if(typeof fileName == 'string') {
+		try{
+			this.outStream = FS.createWriteStream(fileName);
+		}
+		catch(err){
+			this.outStream = FS.createWriteStream('default.access.log');
+		}
+	}
 };
 
 LGR.prototype.setErr = function(fileName) {
-	if(typeof fileName == 'string') this.errStream = FS.createWriteStream(fileName);
+	if(typeof fileName == 'string') {
+		try{
+			this.errStream = FS.createWriteStream(fileName);
+		}
+		catch(err){
+			this.errStream = FS.createWriteStream('default.error.log');
+		}
+	}
 };
 
+
 LGR.prototype.critical = function() {
-	this.count++;
-	this.errStream.write('CRITICAL! ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	if(this.level <= CRITICAL){
+		this.count++;
+		this.errStream.write('CRITICAL! ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	}
 };
 
 LGR.prototype.error = function() {
-	this.count++;
-	this.errStream.write('ERR! ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	if(this.level <= ERROR){
+		this.count++;
+		this.errStream.write('ERR! ' + this._p() + this.toStr(arguments).join(" ") + "\n");	
+	}
 };
 
 LGR.prototype.log = function() {
@@ -47,18 +84,24 @@ LGR.prototype.log = function() {
 };
 
 LGR.prototype.info = function() {
-	this.count++;
-	this.outStream.write('log ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	if(this.level <= INFO){
+		this.count++;
+		this.outStream.write('log ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	}
 };
 
 LGR.prototype.verbose = function() {
-	this.count++;
-	this.outStream.write('verb ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	if(this.level <= VERBOSE){
+		this.count++;
+		this.outStream.write('verb ' + this._p() + this.toStr(arguments).join(" ") + "\n");	
+	}
 };
 
 LGR.prototype.debug = function() {
-	this.count++;
-	this.outStream.write('debug ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	if(this.level <= DEBUG){
+		this.count++;
+		this.outStream.write('debug ' + this._p() + this.toStr(arguments).join(" ") + "\n");
+	}
 };
 
 LGR.prototype.setLogFormat = function(format) {
@@ -66,7 +109,9 @@ LGR.prototype.setLogFormat = function(format) {
 };
 
 LGR.prototype.setLevel = function(level) {
-	this.level = level;
+	this.level = _.indexOf(this.levelsMap, level);
+
+	if(this.level === -1) this.level = INFO;
 };
 
 LGR.prototype._p = function(){
@@ -79,4 +124,4 @@ LGR.prototype._p = function(){
     });
 };
 
-module.exports = new LGR();
+module.exports = LGR;
