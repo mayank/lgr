@@ -1,6 +1,6 @@
 {
   "name": "fwrite-logger",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Writes Logs to files avoiding console.log memory leaks",
   "main": "index.js",
   "scripts": {
