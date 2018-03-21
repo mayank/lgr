@@ -3,17 +3,20 @@ var
 	_ 				= require('lodash'),
 	MOMENT 			= require('moment'),
 
-
 	DEBUG 			= 0,
 	VERBOSE 		= 1,
 	INFO 			= 2,
 	ERROR 			= 3,
-	CRITICAL 		= 4;
+	CRITICAL 		= 4,
+
+	WRITE_FLAGS		= { 'encoding': 'utf8', 'flags': 'a+' };
 
 function LGR() {
 
 	this.count = 0;
     this.setLogFormat('<%= ts %> [<%= uptime %>] [<%= count %>] ');
+
+    this.level = INFO;
 
     this.levelsMap = [
     	'debug', 
@@ -24,8 +27,8 @@ function LGR() {
     ];
 
 	try{
-		this.outStream = FS.createWriteStream('default.access.log');
-		this.errStream = FS.createWriteStream('default.error.log');
+		this.outStream = FS.createWriteStream('default.access.log', WRITE_FLAGS);
+		this.errStream = FS.createWriteStream('default.error.log', WRITE_FLAGS);
 	}catch(err){
 		console.log('You don\'t have permission to access current directory from user');
 	}
@@ -44,10 +47,10 @@ LGR.prototype.toStr = function(args) {
 LGR.prototype.setOut = function(fileName) {
 	if(typeof fileName == 'string') {
 		try{
-			this.outStream = FS.createWriteStream(fileName);
+			this.outStream = FS.createWriteStream(fileName, WRITE_FLAGS);
 		}
 		catch(err){
-			this.outStream = FS.createWriteStream('default.access.log');
+			this.outStream = FS.createWriteStream('default.access.log', WRITE_FLAGS);
 		}
 	}
 };
@@ -55,10 +58,10 @@ LGR.prototype.setOut = function(fileName) {
 LGR.prototype.setErr = function(fileName) {
 	if(typeof fileName == 'string') {
 		try{
-			this.errStream = FS.createWriteStream(fileName);
+			this.errStream = FS.createWriteStream(fileName, WRITE_FLAGS);
 		}
 		catch(err){
-			this.errStream = FS.createWriteStream('default.error.log');
+			this.errStream = FS.createWriteStream('default.error.log', WRITE_FLAGS);
 		}
 	}
 };
@@ -74,7 +77,7 @@ LGR.prototype.critical = function() {
 LGR.prototype.error = function() {
 	if(this.level <= ERROR){
 		this.count++;
-		this.errStream.write('ERR! ' + this._p() + this.toStr(arguments).join(" ") + "\n");	
+		this.errStream.write('ERR! ' + this._p() + this.toStr(arguments).join(" ") + "\n");
 	}
 };
 
@@ -124,4 +127,4 @@ LGR.prototype._p = function(){
     });
 };
 
-module.exports = LGR;
+module.exports = new LGR();
