@@ -9,7 +9,15 @@ var
 	ERROR 			= 3,
 	CRITICAL 		= 4,
 
-	WRITE_FLAGS		= { 'encoding': 'utf8', 'flags': 'a+' };
+	WRITE_FLAGS		= { 'encoding': 'utf8', 'flags': 'a' },
+
+	LEVEL_MAP 		= [
+    	'debug', 
+    	'verbose', 
+    	'info', 
+    	'error', 
+    	'critical'
+    ];
 
 function LGR() {
 
@@ -17,14 +25,6 @@ function LGR() {
     this.setLogFormat('<%= ts %> [<%= uptime %>] [<%= count %>] ');
 
     this.level = INFO;
-
-    this.levelsMap = [
-    	'debug', 
-    	'verbose', 
-    	'info', 
-    	'error', 
-    	'critical'
-    ];
 
 	try{
 		this.outStream = FS.createWriteStream('default.access.log', WRITE_FLAGS);
@@ -112,7 +112,7 @@ LGR.prototype.setLogFormat = function(format) {
 };
 
 LGR.prototype.setLevel = function(level) {
-	this.level = _.indexOf(this.levelsMap, level);
+	this.level = _.indexOf(LEVEL_MAP, level);
 
 	if(this.level === -1) this.level = INFO;
 };
