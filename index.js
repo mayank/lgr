@@ -1,6 +1,7 @@
 var 
-	FS				= require('fs'),
-	_ 				= require('lodash'),
+	FS			= require('fs'),
+	_ 			= require('lodash'),
+	PROGRAM			= require('commander'),
 	MOMENT 			= require('moment'),
 
 	DEBUG 			= 0,
@@ -19,17 +20,30 @@ var
     	'critical'
     ];
 
+
+// overriding init
+PROGRAM
+	.option('-l, --logfile', 'reads log file from input')
+	.option('-e, --errorfile', 'reads error file from input')
+	.parse(process.argv);
+
+var
+	STD_OUT = PROGRAM.logfile;
+	STD_ERR = PROGRAM.errorfile;
+
 function LGR() {
 
-	this.count = 0;
+    this.count = 0;
     this.setLogFormat('<%= ts %> [<%= uptime %>] [<%= count %>] ');
 
     this.level = INFO;
 
 	try{
-		this.outStream = FS.createWriteStream('default.access.log', WRITE_FLAGS);
-		this.errStream = FS.createWriteStream('default.error.log', WRITE_FLAGS);
+		this.outStream = FS.createWriteStream(STD_OUT, WRITE_FLAGS);
+		this.errStream = FS.createWriteStream(STD_ERR, WRITE_FLAGS);
 	}catch(err){
+		this.outStream = process.stdout;
+		this.errStream = process.stderr;
 		console.log('You don\'t have permission to access current directory from user');
 	}
 }
