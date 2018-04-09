@@ -1,5 +1,5 @@
 {
-  "name": "@mayank/lgr",
+  "name": "@mayank2103/lgr",
   "version": "1.0.0",
   "description": "Writes Logs to files avoiding console.log memory leaks",
   "main": "index.js",
