@@ -27,8 +27,8 @@ function LGR() {
 
     this.level = INFO;
 
-    this.setOut(process.stdout);
-    this.setErr(process.stderr);
+    this.outStream = process.stdout;
+    this.errStream = process.stderr;
 
 }
 
