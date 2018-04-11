@@ -1,7 +1,6 @@
 var 
-	FS			= require('fs'),
-	_ 			= require('lodash'),
-	PROGRAM			= require('commander'),
+	FS				= require('fs'),
+	_ 				= require('lodash'),
 	MOMENT 			= require('moment'),
 
 	DEBUG 			= 0,
@@ -21,16 +20,6 @@ var
     ];
 
 
-// overriding init
-PROGRAM
-	.option('-l, --logfile', 'reads log file from input')
-	.option('-e, --errorfile', 'reads error file from input')
-	.parse(process.argv);
-
-var
-	STD_OUT = PROGRAM.logfile;
-	STD_ERR = PROGRAM.errorfile;
-
 function LGR() {
 
     this.count = 0;
@@ -38,14 +27,9 @@ function LGR() {
 
     this.level = INFO;
 
-	try{
-		this.outStream = FS.createWriteStream(STD_OUT, WRITE_FLAGS);
-		this.errStream = FS.createWriteStream(STD_ERR, WRITE_FLAGS);
-	}catch(err){
-		this.outStream = process.stdout;
-		this.errStream = process.stderr;
-		console.log('You don\'t have permission to access current directory from user');
-	}
+    this.setOut(process.stdout);
+    this.setErr(process.stderr);
+
 }
 
 LGR.prototype.toStr = function(args) {
@@ -64,7 +48,7 @@ LGR.prototype.setOut = function(fileName) {
 			this.outStream = FS.createWriteStream(fileName, WRITE_FLAGS);
 		}
 		catch(err){
-			this.outStream = FS.createWriteStream('default.access.log', WRITE_FLAGS);
+			this.outStream = process.stdout;
 		}
 	}
 };
@@ -75,7 +59,7 @@ LGR.prototype.setErr = function(fileName) {
 			this.errStream = FS.createWriteStream(fileName, WRITE_FLAGS);
 		}
 		catch(err){
-			this.errStream = FS.createWriteStream('default.error.log', WRITE_FLAGS);
+			this.errStream = process.stderr;
 		}
 	}
 };
